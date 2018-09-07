@@ -2,11 +2,10 @@
 # -*-coding：gbk-*-
 
 import requests
-import sys
 import json
 from bs4 import BeautifulSoup
+import lxml
 
-sys.path.append("..")
 from common.RandomHeaders import randomHeaders
 from common.RandomProxy import randomProxy
 

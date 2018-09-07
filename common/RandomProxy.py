@@ -3,10 +3,12 @@
 
 import random
 import demjson
+import os
 
 
 def randomProxy():
-    file = open("ip.json")
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    file = open(curr_dir + os.sep + "ip.json")
     jsontext = file.read()
     file.close()
     ip_pool = demjson.decode(jsontext)
@@ -16,5 +18,3 @@ def randomProxy():
     proxies = {ip["proxy"]: proxy_ip}
     print(proxies)
     return proxies
-
-

@@ -7,7 +7,7 @@ from helper.CitysList import getCity
 def collector():
     cityList = []
     try:
-        file = open("city.json", mode='r')
+        file = open("./helper/city.json", mode='r')
         cityList = json.loads(file.read())
     except (OSError):
         cityList = getCity()
