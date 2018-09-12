@@ -6,7 +6,6 @@ import json
 from bs4 import BeautifulSoup
 import os
 import time
-import string
 from common.RandomHeaders import randomHeaders
 from common.RandomProxy import randomProxy
 
@@ -16,18 +15,34 @@ class Grep:
     selects = []
     sense = '访问验证'
     grepMap = {}
+    timesleep = 1
+
+    def divGroup(self, list, mod_num, mod_index):
+        slen = len(list)
+        nlist = []
+        for i in range(0, slen):
+            if i % mod_num == mod_index:
+                nlist.append(list[i])
+        return nlist
+
+    def setTimesleep(self, timesleep):
+        self.timesleep = timesleep
+        return self
 
     def setSelects(self, selects):
         self.selects = selects
         return self
 
-    def html(self, url, dev=False, autoHeader=True, autoProxy=True, proxies={}, header={}):
-        time.sleep(5)
-        print(url)
+    def html(self, url, dev=False, autoHeader=True, autoProxy=True, proxies={}, header={}, isPrintUrl=True,
+             isProxyPrint=True):
+        time.sleep(self.timesleep)
+        if isPrintUrl:
+            print(url)
+        isError = False
         if autoHeader:
             header = randomHeaders()
         if autoProxy:
-            proxies = randomProxy()
+            proxies = randomProxy(isProxyPrint)
         try:
             requst = requests.get(url, headers=header, proxies=proxies, timeout=5)
             html_doc = requst.text
@@ -36,12 +51,15 @@ class Grep:
                 print(self.soup.prettify())
         except(requests.exceptions.ProxyError, requests.exceptions.ConnectTimeout):
             print('failed!')
-        return self.retry(url, dev, autoProxy)
+            isError = True
+        return self.retry(url, dev, autoProxy, isError)
 
-    def retry(self, url, dev, autoProxy):
+    def retry(self, url, dev, autoProxy, isError=False):
+        if isError:
+            return self.html(url, dev, autoProxy)
         if self.sense in self.soup.text:
             print("重试==》")
-            self.html(url, dev, autoProxy)
+            return self.html(url, dev, autoProxy)
         return True
 
     def active(self, isGrepOne=False):
@@ -97,14 +115,10 @@ class Grep:
         return result
 
     def save(self, ls, filename):
-        if len(ls) > 0:
-            try:
-                curr_dir = os.path.dirname(os.path.realpath(__file__))
-                path = curr_dir + os.sep + filename
-                file = open(path, mode='w')
-                txt = json.dumps(ls, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
-                file.write(txt)
-                file.flush()
-                file.close()
-            except():
-                print('failed!')
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        path = curr_dir + os.sep + filename
+        file = open(path, mode='w')
+        txt = json.dumps(ls, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+        file.write(txt)
+        file.flush()
+        file.close()
