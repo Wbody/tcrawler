@@ -34,7 +34,7 @@ class anjuke():
                 obj["district"] = district
                 poi = jsonObj["result"]["pois"][0]["addr"]
             except(OSError):
-                return
+                print("poi不存在")
 
     def getCity(self):
         grep = Grep().setTimesleep(self.timesleep)
@@ -103,7 +103,7 @@ class anjuke():
             obj = {}
             image = select.select_one("img").get("src")
             xiaoqu = select.select_one(".li-info h3 a")
-            name = xiaoqu.text
+            rname = xiaoqu.text
             info = select.select_one(".date").text.strip()
             href = xiaoqu.get("href")
             location = select.select_one(".bot-tag > a:nth-of-type(1)").get("href")
@@ -111,7 +111,7 @@ class anjuke():
             res = parse.parse_qs(params)
             lng = res["l1"][0]
             lat = res["l2"][0]
-            obj = {"img": image, "href": href, "name": name, "lng": lng, "lat": lat, "info": info}
+            obj = {"img": image, "href": href, "name": rname, "lng": lng, "lat": lat, "info": info}
             self.getXiaoQuDetail(href, obj)
             self.geo(obj)
             print(obj)
