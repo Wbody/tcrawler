@@ -47,7 +47,7 @@ class anjuke():
 
     def collector(self, mod_num=1, mod_index=0):
         try:
-            file = open("./conf/city.json", mode='r')
+            file = open("./conf/city.json", mode='rb')
             cityList = json.loads(file.read())
         except (OSError):
             cityList = self.getCity()
