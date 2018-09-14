@@ -2,6 +2,8 @@
 # -*-coding：gbk-*-
 
 import json
+from json import JSONDecodeError
+
 from helper.Grep import Grep
 from urllib import parse
 import os
@@ -30,10 +32,10 @@ class anjuke():
                 obj["address"] = address
                 obj["province"] = province
                 obj["city"] = city
-                obj["poi"] = city
-                obj["district"] = district
                 poi = jsonObj["result"]["pois"][0]["addr"]
-        except(IndexError):
+                obj["poi"] = poi
+                obj["district"] = district
+        except(IndexError, JSONDecodeError):
             print("poi不存在")
 
     def getCity(self):
