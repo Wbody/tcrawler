@@ -20,9 +20,9 @@ class anjuke():
         url = "http://api.map.baidu.com/geocoder/v2/?location=" + obj["lng"] + "," + obj[
             "lat"] + "&output=json&pois=1&ak=rhRhulWg5FGAh83v7fkHxhc4j2779L8d"
         requst = requests.get(url)
-        jsonObj = json.loads(requst.text)
-        if jsonObj["status"] == 0:
-            try:
+        try:
+            jsonObj = json.loads(requst.text)
+            if jsonObj["status"] == 0:
                 address = jsonObj["result"]["formatted_address"]
                 province = jsonObj["result"]["addressComponent"]["province"]
                 city = jsonObj["result"]["addressComponent"]["city"]
@@ -33,8 +33,8 @@ class anjuke():
                 obj["poi"] = city
                 obj["district"] = district
                 poi = jsonObj["result"]["pois"][0]["addr"]
-            except(IndexError):
-                print("poi不存在")
+        except(IndexError):
+            print("poi不存在")
 
     def getCity(self):
         grep = Grep().setTimesleep(self.timesleep)
