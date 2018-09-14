@@ -117,7 +117,7 @@ class Grep:
     def save(self, ls, filename):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         path = curr_dir + os.sep + filename
-        file = open(path, mode='w')
+        file = open(path, mode='w', encoding="utf-8")
         txt = json.dumps(ls, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
         file.write(txt)
         file.flush()

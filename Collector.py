@@ -33,7 +33,7 @@ class anjuke():
                 obj["poi"] = city
                 obj["district"] = district
                 poi = jsonObj["result"]["pois"][0]["addr"]
-            except(OSError):
+            except(IndexError):
                 print("poi不存在")
 
     def getCity(self):
@@ -48,11 +48,11 @@ class anjuke():
     def collector(self, mod_num=1, mod_index=0):
         try:
             file = open("./conf/city.json", mode='rb')
-            cityList = json.loads(file.read())
-        except (OSError):
-            cityList = self.getCity()
-        cityList = Grep().divGroup(cityList, mod_num, mod_index)
-        for city in cityList:
+            city_list = json.loads(file.read())
+        except IOError:
+            city_list = self.getCity()
+        city_list = Grep().divGroup(city_list, mod_num, mod_index)
+        for city in city_list:
             flag = os.path.exists("./out/" + city["name"] + ".json")
             if not flag:
                 self.getXiaoQu(city["href"], city["name"])
