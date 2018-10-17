@@ -55,52 +55,39 @@ class anjuke():
             city_list = self.getCity()
 
         city_list = Grep().divGroup(city_list, mod_num, mod_index)
-        Grep().save(city_list, ".." + os.sep + "out1" + os.sep + "city_" + str(mod_index) + ".json")
+        Grep().save(city_list, ".." + os.sep + "out2" + os.sep + "city_" + str(mod_index) + ".json")
 
         for city in city_list:
-            flag = os.path.exists("./out1/" + city["name"] + ".json")
+            flag = os.path.exists("./out2/" + city["name"] + ".json")
             if not flag:
                 try:
                     self.getXiaoQu(city["href"], city["name"])
                 except OSError:
                     continue
 
-    def getXiaoQuDetail(self, url, obj):
+    def getLouPanUrl(self, url):
         grep = Grep().setTimesleep(self.timesleep)
-        arr = url.split("community")
         header = {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Host": url.replace("https://", "").split("/")[0],
-            "Referer": arr[0] + "community/props/sale" + arr[1],
+            "Host": url.replace("https://", ""),
+            "Referer": "https://www.anjuke.com/sy-city.html",
             "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0"
         }
-        grep.html(url, autoHeader=False, header=header, isPrintUrl=False, isProxyPrint=False)
-
-        try:
-            image = grep.soup.select_one("#j-switch-basic img:nth-of-type(1)").get("src")
-            obj["bigimage"] = image
-            decription = grep.soup.select_one(".comm-brief-mod.j-ext-infos > p:nth-of-type(1)")
-            obj["decription"] = ""
-            if decription is not None:
-                obj["decription"] = decription.text
-
-            info = grep.soup.select("dl.basic-parms-mod")[0]
-            lx = info.select_one("dt:nth-of-type(1)").text + info.select_one("dd:nth-of-type(1)").text
-            areas = info.select_one("dt:nth-of-type(3)").text + info.select_one("dd:nth-of-type(3)").text
-            sums = info.select_one("dt:nth-of-type(4)").text + info.select_one("dd:nth-of-type(4)").text
-            years = info.select_one("dt:nth-of-type(5)").text + info.select_one("dd:nth-of-type(5)").text
-            lh = info.select_one("dt:nth-of-type(8)").text + info.select_one("dd:nth-of-type(8)").text
-            kfs = info.select_one("dt:nth-of-type(9)").text + info.select_one("dd:nth-of-type(9)").text
-            wygs = info.select_one("dt:nth-of-type(10)").text + info.select_one("dd:nth-of-type(10)").text
-            obj["params"] = lx + ";" + areas + ";" + sums + ";" + years + ";" + lh + ";" + kfs + ";" + wygs + ";"
-        except:
-            print(obj)
+        grep.html(url, autoHeader=False, header=header)
+        select = grep.soup.select_one(".L_tabsnew .div_xinfang a:nth-of-type(1)")
+        if select:
+            return select.get("href")
+        else:
+            return ""
 
     def getXiaoQu(self, url, name, index=1, ls=[]):
+        url = self.getLouPanUrl(url)
+        if not url:
+            return
         isHasNext = False
-        flag = os.path.exists("." + os.sep + "out1" + os.sep + name + "-" + str(index) + ".json")
+        flag = os.path.exists("." + os.sep + "out2" + os.sep + name + "-" + str(index) + ".json")
         if not flag:
-            rurl = url + "/community/p" + str(index) + "?from=navigation"
+            rurl = url + "all/p" + str(index) + "/?from=navigation"
             grep = Grep().setTimesleep(self.timesleep)
             header = {
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -109,7 +96,7 @@ class anjuke():
                 "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0"
             }
             grep.html(rurl, autoHeader=False, header=header)
-            selects = grep.soup.select(".li-itemmod")
+            selects = grep.soup.select(".item-mod")
             check = grep.soup.select_one(".aNxt")
             isHasNext = check
             onePage = []
@@ -117,18 +104,21 @@ class anjuke():
             for select in selects:
                 obj = {}
                 image = select.select_one("img").get("src")
-                xiaoqu = select.select_one(".li-info h3 a")
+                xiaoqu = select.select_one(".infos .lp-name")
                 rname = xiaoqu.text
-                info = select.select_one(".date").text.strip()
                 href = xiaoqu.get("href")
-                location = select.select_one(".bot-tag > a:nth-of-type(1)").get("href")
-                params = location.split("#")[1]
-                res = parse.parse_qs(params)
-                lng = res["l1"][0]
-                lat = res["l2"][0]
-                obj = {"img": image, "href": href, "name": rname, "lng": lng, "lat": lat, "info": info}
-                self.getXiaoQuDetail(href, obj)
-                # self.geo(obj)
+
+                info = select.select_one(".huxing").text.strip()
+                status = select.select(".status-icon")
+                params = ""
+                for s in status:
+                    params + s.text.strip() + ";"
+
+                tag = select.select(".tag")
+                for s in tag:
+                    params + s.text.strip() + ";"
+
+                obj = {"img": image, "href": href, "name": rname, "info": info, "params": params}
                 onePage.append(obj)
                 print(obj)
                 ls.append(obj)
